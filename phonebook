@@ -1,0 +1,105 @@
+def read_txt(filename):  
+    phonebook = []
+    fields = ['Фамилия', 'Имя', 'Отчество', 'Телефон']
+    with open(filename, 'r', encoding='utf-8') as phb:
+        for line in phb:
+            record = dict(zip(fields, line.strip().split(',')))
+            phonebook.append(record)   
+    return phonebook
+
+def write_txt(filename, phonebook):
+    with open(filename, 'w', encoding='utf-8') as phout:
+        for record in phonebook:
+            s = ','.join(record.values())
+            phout.write(f'{s}\n')
+
+def print_result(phonebook):
+    for entry in phonebook:
+        print(', '.join(entry.values()))
+
+def find_by_lastname(phonebook, last_name):
+    results = [entry for entry in phonebook if entry['Фамилия'] == last_name]
+    return results if results else "Абонент не найден"
+
+def change_number(phonebook, last_name, new_number):
+    for entry in phonebook:
+        if entry['Фамилия'] == last_name:
+            entry['Телефон'] = new_number
+            return "Номер изменен"
+    return "Абонент не найден"
+
+def delete_by_lastname(phonebook, last_name):
+    initial_length = len(phonebook)
+    phonebook[:] = [entry for entry in phonebook if entry['Фамилия'] != last_name]
+    return "Абонент удален" if len(phonebook) < initial_length else "Абонент не найден"
+
+def find_by_number(phonebook, number):
+    results = [entry for entry in phonebook if entry['Телефон'] == number]
+    return results if results else "Абонент не найден"
+
+def add_user(phonebook, user_data):
+    fields = ['Фамилия', 'Имя', 'Отчество', 'Телефон']
+    new_entry = dict(zip(fields, user_data.split(', ')))
+    phonebook.append(new_entry)
+
+def copy_entry(source_file, dest_file, line_number):
+    source_phonebook = read_txt(source_file)
+    if 0 <= line_number < len(source_phonebook):
+        entry_to_copy = source_phonebook[line_number]
+        dest_phonebook = read_txt(dest_file)
+        dest_phonebook.append(entry_to_copy)
+        write_txt(dest_file, dest_phonebook)
+    else:
+        print("Некорректный номер строки для копирования.")
+
+def show_menu():
+    print("\nВыберите необходимое действие:\n"
+          "1. Отобразить весь справочник\n"
+          "2. Найти абонента по фамилии\n"
+          "3. Изменить номер абонента по фамилии\n"
+          "4. Удалить абонента по фамилии\n"
+          "5. Найти абонента по номеру телефона\n"
+          "6. Добавить абонента в справочник\n"
+          "7. Скопировать запись из одного файла в другой\n"
+          "8. Закончить работу")
+   
+    choice = int(input())
+    return choice
+
+def work_with_phonebook():
+    phonebook = read_txt('phone.txt')
+
+    choice = show_menu()
+    while choice != 8:
+        if choice == 1:
+            print_result(phonebook)
+        elif choice == 2:
+            last_name = input('Lastname: ')
+            print(find_by_lastname(phonebook, last_name))
+        elif choice == 3:
+            last_name = input('Lastname: ')
+            new_number = input('New number: ')
+            print(change_number(phonebook, last_name, new_number))
+        elif choice == 4:
+            last_name = input('Lastname: ')
+            print(delete_by_lastname(phonebook, last_name))
+        elif choice == 5:
+            number = input('Number: ')
+            print(find_by_number(phonebook, number))
+        elif choice == 6:
+            user_data = input('New data (Фамилия, Имя, Отчество, Телефон): ')
+            add_user(phonebook, user_data)
+        elif choice == 7:  
+            source_file = input('Source file name: ')
+            dest_file = input('Destination file name: ')
+            line_number = int(input('Line number to copy: '))
+            copy_entry(source_file, dest_file, line_number)
+        else:
+            print("Некорректный выбор. Пожалуйста, попробуйте снова.")
+
+        choice = show_menu()
+
+    write_txt('phone.txt', phonebook)
+    print("Работа завершена, данные сохранены.")
+
+work_with_phonebook()      
